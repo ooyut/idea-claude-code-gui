@@ -7,6 +7,11 @@ import './i18n/config';
 import i18n from './i18n/config';
 import { setupSlashCommandsCallback } from './components/ChatInputBox/providers/slashCommandProvider';
 import { sendBridgeEvent } from './utils/bridge';
+import { initPlatform } from './platform';
+
+// Initialize platform adapter early
+const platformAdapter = initPlatform();
+console.log('[Main] Platform initialized:', platformAdapter.platform);
 
 // vConsole 调试工具
 const enableVConsole =

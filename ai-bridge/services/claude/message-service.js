@@ -440,7 +440,7 @@ function createPreToolUseHook(permissionMode) {
  * @param {string} agentPrompt - 智能体提示词（可选）
  * @param {boolean} streaming - 是否启用流式传输（可选，默认从配置读取）
  */
-export async function sendMessage(message, resumeSessionId = null, cwd = null, permissionMode = null, model = null, openedFiles = null, agentPrompt = null, streaming = null) {
+export async function sendMessage(message, resumeSessionId = null, cwd = null, permissionMode = null, model = null, openedFiles = null, agentPrompt = null, streaming = null, thinkingEnabledParam = null) {
   console.log('[DIAG] ========== sendMessage() START ==========');
   console.log('[DIAG] message length:', message ? message.length : 0);
   console.log('[DIAG] resumeSessionId:', resumeSessionId || '(new session)');
@@ -460,6 +460,15 @@ export async function sendMessage(message, resumeSessionId = null, cwd = null, p
 
     // 设置 API Key 并获取配置信息（包含认证类型）
     const { baseUrl, authType, apiKeySource, baseUrlSource } = setupApiKey();
+
+    if (!process.env.HOME) {
+      const osMod = await import('os');
+      process.env.HOME = osMod.homedir();
+    }
+    if (process.platform === 'win32' && !process.env.USERPROFILE) {
+      const osMod = await import('os');
+      process.env.USERPROFILE = osMod.homedir();
+    }
 
     // 检测是否使用自定义 Base URL
     if (isCustomBaseUrl(baseUrl)) {
@@ -521,9 +530,12 @@ export async function sendMessage(message, resumeSessionId = null, cwd = null, p
 	    console.log('[PERM_DEBUG] shouldUseCanUseTool:', shouldUseCanUseTool);
 	    console.log('[PERM_DEBUG] canUseTool function defined:', typeof canUseTool);
 
-    // 🔧 从 settings.json 读取 Extended Thinking 配置
+    // 🔧 从 settings.json 读取 Extended Thinking 配置（可被调用方 thinkingEnabledParam 覆盖）
     const settings = loadClaudeSettings();
-    const alwaysThinkingEnabled = settings?.alwaysThinkingEnabled ?? true;
+    const alwaysThinkingEnabled =
+      typeof thinkingEnabledParam === 'boolean'
+        ? thinkingEnabledParam
+        : (settings?.alwaysThinkingEnabled ?? true);
     const configuredMaxThinkingTokens = settings?.maxThinkingTokens
       || parseInt(process.env.MAX_THINKING_TOKENS || '0', 10)
       || 10000;
@@ -1165,6 +1177,15 @@ export async function sendMessageWithAttachments(message, resumeSessionId = null
     // 设置 API Key 并获取配置信息（包含认证类型）
     const { baseUrl, authType } = setupApiKey();
 
+    if (!process.env.HOME) {
+      const osMod = await import('os');
+      process.env.HOME = osMod.homedir();
+    }
+    if (process.platform === 'win32' && !process.env.USERPROFILE) {
+      const osMod = await import('os');
+      process.env.USERPROFILE = osMod.homedir();
+    }
+
     console.log('[MESSAGE_START]');
 
     const workingDirectory = selectWorkingDirectory(cwd);
@@ -1225,9 +1246,13 @@ export async function sendMessageWithAttachments(message, resumeSessionId = null
     // 注意：根据 SDK 文档，如果不指定 matcher，则该 Hook 会匹配所有工具
     // 这里统一使用一个全局 PreToolUse Hook，由 Hook 内部决定哪些工具自动放行
 
-    // 🔧 从 settings.json 读取 Extended Thinking 配置
+    // 🔧 从 settings.json 读取 Extended Thinking 配置（可被 stdinData.thinkingEnabled 覆盖）
     const settings = loadClaudeSettings();
-    const alwaysThinkingEnabled = settings?.alwaysThinkingEnabled ?? true;
+    const thinkingEnabledParam = stdinData?.thinkingEnabled ?? null;
+    const alwaysThinkingEnabled =
+      typeof thinkingEnabledParam === 'boolean'
+        ? thinkingEnabledParam
+        : (settings?.alwaysThinkingEnabled ?? true);
     const configuredMaxThinkingTokens = settings?.maxThinkingTokens
       || parseInt(process.env.MAX_THINKING_TOKENS || '0', 10)
       || 10000;

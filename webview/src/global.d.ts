@@ -1,9 +1,33 @@
 /**
- * Global window interface extensions for IDEA plugin communication
+ * VSCode API interface
+ */
+interface VSCodeApi {
+  postMessage(message: unknown): void;
+  getState(): unknown;
+  setState(state: unknown): void;
+}
+
+/**
+ * Global acquireVsCodeApi function (available in VSCode webview)
+ */
+declare function acquireVsCodeApi(): VSCodeApi;
+
+/**
+ * Global window interface extensions for platform communication
  */
 interface Window {
   /**
-   * Send message to Java backend
+   * VSCode API instance (available in VSCode webview)
+   */
+  vscodeApi?: VSCodeApi;
+
+  /**
+   * Flag indicating VSCode environment
+   */
+  isVSCode?: boolean;
+
+  /**
+   * Send message to Java backend (legacy IDEA support, also used as compatibility layer in VSCode)
    */
   sendToJava?: (message: string) => void;
 

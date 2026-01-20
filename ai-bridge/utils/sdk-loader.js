@@ -9,6 +9,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { pathToFileURL } from 'url';
+import { execSync } from 'child_process';
 
 // 依赖目录基路径
 const DEPS_BASE = join(homedir(), '.codemoss', 'dependencies');
@@ -105,18 +106,82 @@ export function getCodexSdkPath() {
 
 /**
  * 检查 Claude Code SDK 是否可用
+ * Checks local installation at ~/.codemoss/dependencies/claude-sdk/
  */
 export function isClaudeSdkAvailable() {
+    // Check local installation - this is the primary and correct path
     const sdkPath = getClaudeSdkPath();
-    return existsSync(sdkPath);
+    const exists = existsSync(sdkPath);
+    console.error('[SDK-CHECK] Claude SDK path:', sdkPath);
+    console.error('[SDK-CHECK] Claude SDK exists:', exists);
+
+    if (exists) {
+        return true;
+    }
+
+    // Also check if package.json exists in the SDK dir (alternative marker)
+    const packageJsonPath = join(sdkPath, 'package.json');
+    const packageExists = existsSync(packageJsonPath);
+    console.error('[SDK-CHECK] Claude package.json path:', packageJsonPath);
+    console.error('[SDK-CHECK] Claude package.json exists:', packageExists);
+
+    return packageExists;
 }
 
 /**
  * 检查 Codex SDK 是否可用
+ * Checks local installation at ~/.codemoss/dependencies/codex-sdk/
  */
 export function isCodexSdkAvailable() {
+    // Check local installation - this is the primary and correct path
     const sdkPath = getCodexSdkPath();
-    return existsSync(sdkPath);
+    const exists = existsSync(sdkPath);
+    console.error('[SDK-CHECK] Codex SDK path:', sdkPath);
+    console.error('[SDK-CHECK] Codex SDK exists:', exists);
+
+    if (exists) {
+        return true;
+    }
+
+    // Also check if package.json exists in the SDK dir (alternative marker)
+    const packageJsonPath = join(sdkPath, 'package.json');
+    const packageExists = existsSync(packageJsonPath);
+
+    return packageExists;
+}
+
+/**
+ * Get Claude SDK version from package.json
+ * @returns {string|null} Version string or null if not available
+ */
+export function getClaudeSdkVersion() {
+    const packageJsonPath = join(getClaudeSdkPath(), 'package.json');
+    try {
+        if (existsSync(packageJsonPath)) {
+            const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+            return packageJson.version || null;
+        }
+    } catch (error) {
+        console.error('[SDK-CHECK] Failed to read Claude SDK version:', error.message);
+    }
+    return null;
+}
+
+/**
+ * Get Codex SDK version from package.json
+ * @returns {string|null} Version string or null if not available
+ */
+export function getCodexSdkVersion() {
+    const packageJsonPath = join(getCodexSdkPath(), 'package.json');
+    try {
+        if (existsSync(packageJsonPath)) {
+            const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+            return packageJson.version || null;
+        }
+    } catch (error) {
+        console.error('[SDK-CHECK] Failed to read Codex SDK version:', error.message);
+    }
+    return null;
 }
 
 /**
@@ -311,11 +376,13 @@ export function getSdkStatus() {
     return {
         claude: {
             installed: isClaudeSdkAvailable(),
-            path: getClaudeSdkPath()
+            path: getClaudeSdkPath(),
+            version: getClaudeSdkVersion()
         },
         codex: {
             installed: isCodexSdkAvailable(),
-            path: getCodexSdkPath()
+            path: getCodexSdkPath(),
+            version: getCodexSdkVersion()
         }
     };
 }

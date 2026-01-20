@@ -454,6 +454,8 @@ export function useWindowCallbacks(options: UseWindowCallbacksOptions): void {
       useBackendStreamingRenderRef.current = false;
       autoExpandedThinkingKeysRef.current.clear();
       setStreamingActive(true);
+      setLoading(true);
+      setLoadingStartTime((prev) => prev ?? Date.now());
       isUserAtBottomRef.current = true;
       streamingTextSegmentsRef.current = [];
       activeTextSegmentIndexRef.current = -1;
@@ -599,6 +601,8 @@ export function useWindowCallbacks(options: UseWindowCallbacksOptions): void {
       console.log('[Frontend] Stream ended');
       isStreamingRef.current = false;
       useBackendStreamingRenderRef.current = false;
+      setLoading(false);
+      setLoadingStartTime(null);
 
       if (contentUpdateTimeoutRef.current) {
         clearTimeout(contentUpdateTimeoutRef.current);

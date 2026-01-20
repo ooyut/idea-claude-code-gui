@@ -1,0 +1,161 @@
+{
+  "name": "codemoss",
+  "displayName": "CodeMoss AI Assistant",
+  "description": "AI-powered coding assistant for VSCode with Claude and Codex support",
+  "version": "0.1.15",
+  "publisher": "codemoss",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhukunpenglinyutong/idea-claude-code-gui"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "assistant",
+    "claude",
+    "codex",
+    "copilot",
+    "chat"
+  ],
+  "activationEvents": [
+    "onView:codemoss.panel",
+    "onCommand:codemoss.openPanel",
+    "onCommand:codemoss.newSession",
+    "onCommand:codemoss.sendSelection"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codemoss",
+          "title": "CodeMoss",
+          "icon": "images/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "codemoss": [
+        {
+          "type": "webview",
+          "id": "codemoss.panel",
+          "name": "AI Assistant"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "codemoss.openPanel",
+        "title": "Open CodeMoss Panel",
+        "category": "CodeMoss"
+      },
+      {
+        "command": "codemoss.newSession",
+        "title": "New Chat Session",
+        "category": "CodeMoss"
+      },
+      {
+        "command": "codemoss.sendSelection",
+        "title": "Send Selection to CodeMoss",
+        "category": "CodeMoss"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "codemoss.sendSelection",
+          "when": "editorHasSelection",
+          "group": "codemoss"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "codemoss.openPanel",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m"
+      }
+    ],
+    "configuration": {
+      "title": "CodeMoss",
+      "properties": {
+        "codemoss.defaultProvider": {
+          "type": "string",
+          "default": "claude",
+          "enum": ["claude", "codex"],
+          "description": "Default AI provider to use"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build": "npm run build:webview && npm run build:extension",
+    "build:extension": "webpack --mode production",
+    "build:webview": "cd webview && npm run build",
+    "dev": "webpack --mode development --watch",
+    "package": "vsce package",
+    "publish": "vsce publish",
+    "lint": "eslint src --ext ts"
+  },
+  "eslintConfig": {
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "env": {
+      "node": true,
+      "es2022": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
+    },
+    "rules": {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }
+      ]
+    },
+    "ignorePatterns": [
+      "out/**",
+      "webview/**",
+      "ai-bridge/**",
+      "node_modules/**"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.22.0",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "eslint": "^8.57.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
+  }
+}

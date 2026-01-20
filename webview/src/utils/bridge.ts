@@ -1,19 +1,42 @@
+import { getAdapter, isVSCode } from '../platform';
+import { MessageTypes } from '../platform/types';
+
 const BRIDGE_UNAVAILABLE_WARNED = new Set<string>();
 
+/**
+ * Internal function to call the bridge
+ * Uses platform adapter for VSCode, falls back to window.sendToJava for IDEA
+ */
 const callBridge = (payload: string) => {
+  // Try VSCode adapter first
+  if (isVSCode()) {
+    const adapter = getAdapter();
+    if (adapter.isReady()) {
+      // Parse the payload and send through adapter
+      const colonIndex = payload.indexOf(':');
+      if (colonIndex === -1) {
+        adapter.send(payload);
+      } else {
+        const type = payload.substring(0, colonIndex);
+        const content = payload.substring(colonIndex + 1);
+        try {
+          adapter.send(type, JSON.parse(content));
+        } catch {
+          adapter.send(type, content);
+        }
+      }
+      return true;
+    }
+  }
+
+  // Fall back to legacy sendToJava (for IDEA or if adapter not ready)
   if (window.sendToJava) {
-    // const timestamp = Date.now();
-    // console.log(`[Bridge][${timestamp}][PERF] Sending to Java:`, payload.substring(0, 100));
-    // // 记录消息发送时间，用于计算端到端延迟
-    // if (payload.startsWith('send_message')) {
-    //   console.log(`[Bridge][${timestamp}][PERF] >>> 用户消息发送开始 <<<`);
-    //   (window as any).__lastMessageSendTime = timestamp;
-    // }
     window.sendToJava(payload);
     return true;
   }
+
   if (!BRIDGE_UNAVAILABLE_WARNED.has(payload)) {
-    console.warn('[Bridge] sendToJava not available yet. payload=', payload.substring(0, 50));
+    console.warn('[Bridge] Bridge not available yet. payload=', payload.substring(0, 50));
     BRIDGE_UNAVAILABLE_WARNED.add(payload);
   }
   return false;
@@ -23,18 +46,28 @@ export const sendBridgeEvent = (event: string, content = '') => {
   return callBridge(`${event}:${content}`);
 };
 
-export const openFile = (filePath?: string) => {
+export const openFile = (filePath?: string, line?: number) => {
   if (!filePath) {
     return;
   }
-  sendBridgeEvent('open_file', filePath);
+
+  if (isVSCode()) {
+    getAdapter().openFile(filePath, line);
+  } else {
+    sendBridgeEvent('open_file', filePath);
+  }
 };
 
 export const openBrowser = (url?: string) => {
   if (!url) {
     return;
   }
-  sendBridgeEvent('open_browser', url);
+
+  if (isVSCode()) {
+    getAdapter().openBrowser(url);
+  } else {
+    sendBridgeEvent('open_browser', url);
+  }
 };
 
 export const sendToJava = (message: string, payload: any = {}) => {
@@ -44,11 +77,20 @@ export const sendToJava = (message: string, payload: any = {}) => {
 
 export const refreshFile = (filePath: string) => {
   if (!filePath) return;
-  sendToJava('refresh_file', { filePath });
+
+  if (isVSCode()) {
+    getAdapter().refreshFile(filePath);
+  } else {
+    sendToJava('refresh_file', { filePath });
+  }
 };
 
 export const showDiff = (filePath: string, oldContent: string, newContent: string, title?: string) => {
-  sendToJava('show_diff', { filePath, oldContent, newContent, title });
+  if (isVSCode()) {
+    getAdapter().showDiff(filePath, oldContent, newContent, title);
+  } else {
+    sendToJava('show_diff', { filePath, oldContent, newContent, title });
+  }
 };
 
 export const showMultiEditDiff = (
@@ -56,7 +98,14 @@ export const showMultiEditDiff = (
   edits: Array<{ oldString: string; newString: string; replaceAll?: boolean }>,
   currentContent?: string
 ) => {
-  sendToJava('show_multi_edit_diff', { filePath, edits, currentContent });
+  // VSCode doesn't have multi-edit diff, use regular diff with combined content
+  if (isVSCode()) {
+    // For VSCode, we could potentially combine edits or show them sequentially
+    // For now, just send to the extension which can handle it
+    getAdapter().send('showMultiEditDiff', { filePath, edits, currentContent });
+  } else {
+    sendToJava('show_multi_edit_diff', { filePath, edits, currentContent });
+  }
 };
 
 /**
@@ -65,5 +114,94 @@ export const showMultiEditDiff = (
  * @param userMessageId - User message UUID to rewind to
  */
 export const rewindFiles = (sessionId: string, userMessageId: string) => {
-  sendToJava('rewind_files', { sessionId, userMessageId });
+  if (isVSCode()) {
+    getAdapter().send('rewindFiles', { sessionId, userMessageId });
+  } else {
+    sendToJava('rewind_files', { sessionId, userMessageId });
+  }
+};
+
+/**
+ * Send a message to the AI
+ * @param text - Message text
+ * @param sessionId - Optional session ID
+ */
+export const sendMessage = (text: string, sessionId?: string) => {
+  if (isVSCode()) {
+    getAdapter().send(MessageTypes.SEND_MESSAGE, { text, sessionId });
+  } else {
+    sendToJava('send_message', { text, sessionId });
+  }
+};
+
+/**
+ * Get history sessions
+ */
+export const getHistory = () => {
+  if (isVSCode()) {
+    getAdapter().send(MessageTypes.GET_HISTORY);
+  } else {
+    sendBridgeEvent('get_history');
+  }
+};
+
+/**
+ * Load a specific session
+ * @param sessionId - Session ID to load
+ */
+export const loadSession = (sessionId: string) => {
+  if (isVSCode()) {
+    getAdapter().send(MessageTypes.LOAD_SESSION, { sessionId });
+  } else {
+    sendToJava('load_session', { sessionId });
+  }
+};
+
+/**
+ * Delete a session
+ * @param sessionId - Session ID to delete
+ */
+export const deleteSession = (sessionId: string) => {
+  if (isVSCode()) {
+    getAdapter().send(MessageTypes.DELETE_SESSION, { sessionId });
+  } else {
+    sendToJava('delete_session', { sessionId });
+  }
+};
+
+/**
+ * Get current settings
+ */
+export const getSettings = () => {
+  if (isVSCode()) {
+    getAdapter().send(MessageTypes.GET_SETTINGS);
+  } else {
+    sendBridgeEvent('get_settings');
+  }
+};
+
+/**
+ * Update settings
+ * @param settings - Partial settings to update
+ */
+export const updateSettings = (settings: Record<string, unknown>) => {
+  if (isVSCode()) {
+    getAdapter().send(MessageTypes.UPDATE_SETTINGS, { settings });
+  } else {
+    sendToJava('update_settings', settings);
+  }
+};
+
+/**
+ * Respond to a permission request
+ * @param id - Permission request ID
+ * @param allowed - Whether permission was granted
+ * @param remember - Whether to remember this decision
+ */
+export const respondToPermission = (id: string, allowed: boolean, remember?: boolean) => {
+  if (isVSCode()) {
+    getAdapter().send(MessageTypes.PERMISSION_RESPONSE, { id, allowed, remember });
+  } else {
+    sendToJava('permission_response', { id, allowed, remember });
+  }
 };
