@@ -239,7 +239,7 @@ export interface ModelInfo {
  */
 export const CLAUDE_MODELS: ModelInfo[] = [
   {
-    id: 'claude-sonnet-4-5',
+    id: 'glm-4.7',
     label: 'Sonnet 4.5',
     description: 'Sonnet 4.5 · Use the default model',
   },
