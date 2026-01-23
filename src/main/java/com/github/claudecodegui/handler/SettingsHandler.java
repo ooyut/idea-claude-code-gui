@@ -905,27 +905,19 @@ public class SettingsHandler extends BaseMessageHandler {
                     continue;
                 }
 
-                com.google.gson.JsonObject env = settingsConfig.getAsJsonObject("env");
+                com.google.gson.JsonArray models = settingsConfig.getAsJsonArray("models");
 
                 // 根据基础模型 ID 查找对应的环境变量
                 String actualModel = null;
 
-                // 首先检查 ANTHROPIC_MODEL（主模型配置）
-                if (env.has("ANTHROPIC_MODEL") && !env.get("ANTHROPIC_MODEL").isJsonNull()) {
-                    String mainModel = env.get("ANTHROPIC_MODEL").getAsString();
-                    if (mainModel != null && !mainModel.trim().isEmpty()) {
-                        actualModel = mainModel.trim();
-                    }
-                }
-
                 // 如果主模型未配置，根据基础模型 ID 查找对应的默认模型配置
                 if (actualModel == null) {
-                    if (baseModel.contains("sonnet") && env.has("ANTHROPIC_DEFAULT_SONNET_MODEL")) {
-                        actualModel = env.get("ANTHROPIC_DEFAULT_SONNET_MODEL").getAsString();
-                    } else if (baseModel.contains("opus") && env.has("ANTHROPIC_DEFAULT_OPUS_MODEL")) {
-                        actualModel = env.get("ANTHROPIC_DEFAULT_OPUS_MODEL").getAsString();
-                    } else if (baseModel.contains("haiku") && env.has("ANTHROPIC_DEFAULT_HAIKU_MODEL")) {
-                        actualModel = env.get("ANTHROPIC_DEFAULT_HAIKU_MODEL").getAsString();
+                    for (com.google.gson.JsonElement element : models) {
+                        String id = element.getAsJsonObject().get("id").getAsString();
+                        if (id.equals(baseModel)) {
+                            actualModel = id;
+                            break;
+                        }
                     }
                 }
 
