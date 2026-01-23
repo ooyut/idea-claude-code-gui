@@ -1,6 +1,6 @@
 <idea-plugin>
-    <id>com.github.idea-claude-code-gui</id>
-    <name>Claude Code GUI</name>
+    <id>com.tygit.idea-claude-code-gui</id>
+    <name>Claude Code GUI Pro</name>
     <vendor>CodeMossAI</vendor>
 
     <!-- Resource bundle for i18n -->
