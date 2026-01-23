@@ -5,7 +5,7 @@
 
 /**
  * 将完整的模型 ID 映射为 Claude SDK 期望的简短名称
- * @param {string} modelId - 完整的模型 ID（如 'claude-sonnet-4-5'）
+ * @param {string} modelId - 完整的模型 ID（如 'glm-4.7'）
  * @returns {string} SDK 期望的模型名称（如 'sonnet'）
  */
 export function mapModelIdToSdkName(modelId) {

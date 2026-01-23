@@ -959,7 +959,7 @@ export async function sendMessageWithAnthropicSDK(message, resumeSessionId, cwd,
     try { process.chdir(workingDirectory); } catch {}
 
     const sessionId = (resumeSessionId && resumeSessionId !== '') ? resumeSessionId : randomUUID();
-    const modelId = model || 'claude-sonnet-4-5';
+    const modelId = model || 'glm-4.7';
 
     // 根据认证类型使用正确的 SDK 参数
     // authType = 'auth_token': 使用 authToken 参数（Bearer 认证）

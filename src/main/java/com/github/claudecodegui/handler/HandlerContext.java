@@ -25,7 +25,7 @@ public class HandlerContext {
     // 可变状态通过 getter/setter 访问
     private ClaudeSession session;
     private JBCefBrowser browser;
-    private String currentModel = "claude-sonnet-4-5";
+    private String currentModel = "glm-4.7";
     private String currentProvider = "claude";
     private volatile boolean disposed = false;
 
