@@ -215,14 +215,8 @@ const App = () => {
       }
       return;
     }
-    const env = provider.settingsConfig.env as Record<string, any>;
-    const mapping = {
-      main: env.ANTHROPIC_MODEL ?? '',
-      haiku: env.ANTHROPIC_DEFAULT_HAIKU_MODEL ?? '',
-      sonnet: env.ANTHROPIC_DEFAULT_SONNET_MODEL ?? '',
-      opus: env.ANTHROPIC_DEFAULT_OPUS_MODEL ?? '',
-    };
-    const hasValue = Object.values(mapping).some(v => v && String(v).trim().length > 0);
+    const mapping = provider.settingsConfig.models || [];
+    const hasValue = Array.isArray(mapping) && mapping.length > 0;
     try {
       if (hasValue) {
         window.localStorage.setItem('claude-model-mapping', JSON.stringify(mapping));

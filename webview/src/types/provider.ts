@@ -20,11 +20,13 @@ export interface ProviderConfig {
       ANTHROPIC_AUTH_TOKEN?: string;
       ANTHROPIC_BASE_URL?: string;
       ANTHROPIC_MODEL?: string;
-      ANTHROPIC_DEFAULT_SONNET_MODEL?: string;
-      ANTHROPIC_DEFAULT_OPUS_MODEL?: string;
-      ANTHROPIC_DEFAULT_HAIKU_MODEL?: string;
       [key: string]: any;
     };
+    models?: Array<{
+      id: string;
+      label: string;
+      description?: string;
+    }>;
     alwaysThinkingEnabled?: boolean;
     permissions?: {
       allow?: string[];
