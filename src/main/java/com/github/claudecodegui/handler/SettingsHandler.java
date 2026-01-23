@@ -244,14 +244,8 @@ public class SettingsHandler extends BaseMessageHandler {
 
             LOG.info("[SettingsHandler] Setting model to: " + model);
 
-            // 尝试从设置中获取实际配置的模型名称（支持容量后缀）
-            String actualModel = resolveActualModelName(model);
-            String finalModelName;
-            if (actualModel != null && !actualModel.equals(model)) {
-                LOG.info("[SettingsHandler] Resolved to actual model: " + actualModel);
-                context.setCurrentModel(actualModel);
-                finalModelName = actualModel;
-            } else {
+            String finalModelName = model;
+            {
                 context.setCurrentModel(model);
                 finalModelName = model;
             }
