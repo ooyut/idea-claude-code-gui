@@ -35,29 +35,6 @@ export const ButtonArea = ({
   const { t } = useTranslation();
   // const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /**
-   * 应用模型名称映射
-   * 将基础模型 ID 映射为实际的模型名称（如带容量后缀的版本）
-   */
-  const applyModelMapping = (model: ModelInfo, mapping: { haiku?: string; sonnet?: string; opus?: string }): ModelInfo => {
-    const modelKeyMap: Record<string, keyof typeof mapping> = {
-      'claude-sonnet-4-5': 'sonnet',
-      'claude-opus-4-5-20251101': 'opus',
-      'claude-haiku-4-5': 'haiku',
-    };
-
-    const key = modelKeyMap[model.id];
-    if (key && mapping[key]) {
-      const actualModel = String(mapping[key]).trim();
-      if (actualModel.length > 0) {
-        // 保持原始 id 作为唯一标识，只修改 label 为自定义名称
-        // 这样即使多个模型有相同的 displayName，id 仍然是唯一的
-        return { ...model, label: actualModel };
-      }
-    }
-    return model;
-  };
-
   // 根据当前提供商选择模型列表
   const availableModels = (() => {
     if (currentProvider === 'codex') {
@@ -71,13 +48,7 @@ export const ButtonArea = ({
       if (!stored) {
         return CLAUDE_MODELS;
       }
-      const mapping = JSON.parse(stored) as {
-        main?: string;
-        haiku?: string;
-        sonnet?: string;
-        opus?: string;
-      };
-      return CLAUDE_MODELS.map((m) => applyModelMapping(m, mapping));
+      return JSON.parse(stored) as ModelInfo[];
     } catch {
       return CLAUDE_MODELS;
     }

@@ -35,9 +35,6 @@ export default function ProviderDialog({
   const [apiKey, setApiKey] = useState('');
   const [apiUrl, setApiUrl] = useState('');
 
-  const [haikuModel, setHaikuModel] = useState('');
-  const [sonnetModel, setSonnetModel] = useState('');
-  const [opusModel, setOpusModel] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
   const [jsonConfig, setJsonConfig] = useState('');
   const [jsonError, setJsonError] = useState('');
@@ -85,20 +82,12 @@ export default function ProviderDialog({
         setApiKey(provider.settingsConfig?.env?.ANTHROPIC_AUTH_TOKEN || provider.settingsConfig?.env?.ANTHROPIC_API_KEY || '');
         // 编辑模式下不填充默认值，避免覆盖用户实际使用的第三方代理 URL
         setApiUrl(provider.settingsConfig?.env?.ANTHROPIC_BASE_URL || '');
-        const env = provider.settingsConfig?.env || {};
-
-        setHaikuModel(env.ANTHROPIC_DEFAULT_HAIKU_MODEL || '');
-        setSonnetModel(env.ANTHROPIC_DEFAULT_SONNET_MODEL || '');
-        setOpusModel(env.ANTHROPIC_DEFAULT_OPUS_MODEL || '');
 
         const config = provider.settingsConfig || {
           env: {
             ANTHROPIC_AUTH_TOKEN: '',
             ANTHROPIC_BASE_URL: '',
             ANTHROPIC_MODEL: '',
-            ANTHROPIC_DEFAULT_SONNET_MODEL: '',
-            ANTHROPIC_DEFAULT_OPUS_MODEL: '',
-            ANTHROPIC_DEFAULT_HAIKU_MODEL: '',
           }
         };
         setJsonConfig(JSON.stringify(config, null, 2));
@@ -109,17 +98,11 @@ export default function ProviderDialog({
         setApiKey('');
         setApiUrl('');
 
-        setHaikuModel('');
-        setSonnetModel('');
-        setOpusModel('');
         const config = {
           env: {
             ANTHROPIC_AUTH_TOKEN: '',
             ANTHROPIC_BASE_URL: '',
             ANTHROPIC_MODEL: '',
-            ANTHROPIC_DEFAULT_SONNET_MODEL: '',
-            ANTHROPIC_DEFAULT_OPUS_MODEL: '',
-            ANTHROPIC_DEFAULT_HAIKU_MODEL: '',
           }
         };
         setJsonConfig(JSON.stringify(config, null, 2));
@@ -156,24 +139,6 @@ export default function ProviderDialog({
 
 
 
-  const handleHaikuModelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setHaikuModel(value);
-    updateEnvField('ANTHROPIC_DEFAULT_HAIKU_MODEL', value);
-  };
-
-  const handleSonnetModelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSonnetModel(value);
-    updateEnvField('ANTHROPIC_DEFAULT_SONNET_MODEL', value);
-  };
-
-  const handleOpusModelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setOpusModel(value);
-    updateEnvField('ANTHROPIC_DEFAULT_OPUS_MODEL', value);
-  };
-
   const handleJsonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newJson = e.target.value;
     setJsonConfig(newJson);
@@ -197,24 +162,6 @@ export default function ProviderDialog({
       }
 
 
-
-      if (Object.prototype.hasOwnProperty.call(env, 'ANTHROPIC_DEFAULT_HAIKU_MODEL')) {
-        setHaikuModel(env.ANTHROPIC_DEFAULT_HAIKU_MODEL || '');
-      } else {
-        setHaikuModel('');
-      }
-
-      if (Object.prototype.hasOwnProperty.call(env, 'ANTHROPIC_DEFAULT_SONNET_MODEL')) {
-        setSonnetModel(env.ANTHROPIC_DEFAULT_SONNET_MODEL || '');
-      } else {
-        setSonnetModel('');
-      }
-
-      if (Object.prototype.hasOwnProperty.call(env, 'ANTHROPIC_DEFAULT_OPUS_MODEL')) {
-        setOpusModel(env.ANTHROPIC_DEFAULT_OPUS_MODEL || '');
-      } else {
-        setOpusModel('');
-      }
       setJsonError('');
     } catch (err) {
       setJsonError(t('settings.provider.dialog.jsonError'));
@@ -322,46 +269,6 @@ export default function ProviderDialog({
             </small>
           </div>
 
-          <div className="form-group">
-            <label>{t('settings.provider.dialog.modelMapping')}</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label htmlFor="sonnetModel">{t('settings.provider.dialog.sonnetModel')}</label>
-                <input
-                  id="sonnetModel"
-                  type="text"
-                  className="form-input"
-                  placeholder={t('settings.provider.dialog.sonnetModelPlaceholder')}
-                  value={sonnetModel}
-                  onChange={handleSonnetModelChange}
-                />
-              </div>
-              <div>
-                <label htmlFor="opusModel">{t('settings.provider.dialog.opusModel')}</label>
-                <input
-                  id="opusModel"
-                  type="text"
-                  className="form-input"
-                  placeholder={t('settings.provider.dialog.opusModelPlaceholder')}
-                  value={opusModel}
-                  onChange={handleOpusModelChange}
-                />
-              </div>
-              <div>
-                <label htmlFor="haikuModel">{t('settings.provider.dialog.haikuModel')}</label>
-                <input
-                  id="haikuModel"
-                  type="text"
-                  className="form-input"
-                  placeholder={t('settings.provider.dialog.haikuModelPlaceholder')}
-                  value={haikuModel}
-                  onChange={handleHaikuModelChange}
-                />
-              </div>
-            </div>
-            <small className="form-hint">{t('settings.provider.dialog.modelMappingHint')}</small>
-          </div>
-
           {/* 高级选项 - 暂时隐藏，后续会使用 */}
           {/* <details className="advanced-section">
             <summary className="advanced-toggle">
@@ -406,10 +313,7 @@ export default function ProviderDialog({
     "ANTHROPIC_API_KEY": "",
     "ANTHROPIC_AUTH_TOKEN": "",
     "ANTHROPIC_BASE_URL": "",
-    "ANTHROPIC_MODEL": "",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": ""
+    "ANTHROPIC_MODEL": ""
   },
   "model": "sonnet",
   "alwaysThinkingEnabled": true,
