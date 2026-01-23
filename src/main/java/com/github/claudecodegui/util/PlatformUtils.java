@@ -105,10 +105,10 @@ public class PlatformUtils {
 
                         // 如果没找到，使用兜底值
                         LOG.warn("Failed to detect plugin ID: no matching plugin found");
-                        cachedPluginId = "com.github.idea-claude-code-gui"; // 兜底值
+                        cachedPluginId = "com.tygit.idea-claude-code-gui"; // 兜底值
                     } catch (Exception e) {
                         LOG.warn("Failed to detect plugin ID: " + e.getMessage());
-                        cachedPluginId = "com.github.idea-claude-code-gui"; // 兜底值
+                        cachedPluginId = "com.tygit.idea-claude-code-gui"; // 兜底值
                     }
                 }
             }

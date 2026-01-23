@@ -29,7 +29,7 @@ checkstyle {
     configFile = file('checkstyle.xml')
 }
 
-group = 'com.github.idea-claude-code-gui'
+group = 'com.tygit.idea-claude-code-gui'
 version = '0.1.6-beta2'
 
 java {
