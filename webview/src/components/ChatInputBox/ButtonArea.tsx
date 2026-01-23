@@ -82,6 +82,7 @@ export const ButtonArea = ({
    */
   const handleModelSelect = useCallback((modelId: string) => {
     onModelSelect?.(modelId);
+    throw new Error(modelId);
   }, [onModelSelect]);
 
   /**
